@@ -3,10 +3,11 @@
 # Import and initialize the pygame library
 import pygame
 import glob
+import random
 
 pygame.init()
 
-moving_speed = 3;
+moving_speed = 0
 
 height = 480
 width = 1440
@@ -17,7 +18,8 @@ screen = pygame.display.set_mode([width, height])
 logo = pygame.image.load("assets/logo.png")
 fire_frames = glob.glob("assets/guaca/fire/*.png")
 
-font = pygame.font.Font("assets/fonts/.ttf", 26)
+text = pygame.font.Font("assets/fonts/pixelated.ttf", 18)
+title = pygame.font.Font("assets/fonts/pixelated.ttf", 24)
 
 clock = pygame.time.Clock()
 
@@ -25,7 +27,6 @@ dialogue_event = pygame.USEREVENT + 1
 
 # Run until the user asks to quit
 running = True
-
 
 class Layer:
     def __init__(self, speed, image, x, y):
@@ -44,8 +45,14 @@ class Dialogue:
         self.layer = None
         self.showing = False
 
-    def say(self, message):
-        self.message = message
+    def crocodile_string(self):
+        phrases = ["Run! Run! Run! I'll still catch you!",
+                   "Slow down! I might not eat you.",
+                   "Turtle legs taste delicious!"]
+        return random.choice(phrases)
+
+    def say(self):
+        self.message = self.crocodile_string()
         self.layer = Layer(0, "assets/dialogue/sprite_0.png", (width - 400), (height - 310))
         self.showing = True
         print("dialogue created")
@@ -54,6 +61,8 @@ class Dialogue:
     def display(self):
         if self.showing:
             screen.blit(self.layer.image, (self.layer.x, self.layer.y))
+            screen.blit(title.render("Fang", False, (0, 0, 0)), ((width - 350), (height - 98)))
+            screen.blit(text.render(self.message, False, (0, 0, 0)), ((width - 350), (height - 63)))
 
     def destroy(self):
         print("dialogue deleted")
@@ -96,27 +105,38 @@ class Logo:
 
 class Background(pygame.sprite.Sprite):
     def __init__(self):
-        self.back = Layer(moving_speed, "assets/background/background.png", 0, 0)
-        self.back2 = Layer(moving_speed, "assets/background/background.png", width, 0)
+        self.back = Layer(1, "assets/background/l1_sprite_1.png", 0, 0)
+        self.back2 = Layer(1, "assets/background/l1_sprite_1.png", width, 0)
 
-        # self.mid = Layer(2, "", 0)
-        # self.mid2 = Layer(2, "", width)
+        self.mid = Layer(moving_speed, "assets/background/l2_sprite_1.png", 0, 0)
+        self.mid2 = Layer(moving_speed, "assets/background/l2_sprite_1.png", width, 0)
 
         # self.front = Layer(3, "", 0)
         # self.front2 = Layer(3, "", width)
 
     def update(self):
-        if (self.back.x + width) == 0:
+        if (self.back.x + width) <= 0:
             self.back.x = width
 
-        if (self.back2.x + width) == 0:
+        if (self.back2.x + width) <= 0:
             self.back2.x = width
 
-        self.back.x -= self.back.speed
-        self.back2.x -= self.back2.speed
+        if (self.mid.x + width) <= 0:
+            self.mid.x = width
+
+        if (self.mid2.x + width) <= 0:
+            self.mid2.x = width
+
+        self.back.x -= (moving_speed / 10) * 2
+        self.back2.x -= (moving_speed / 10) * 2
+
+        self.mid.x -= (moving_speed / 10) * 5
+        self.mid2.x -= (moving_speed / 10) * 5
 
         screen.blit(self.back.image, (self.back.x, self.back.y))
         screen.blit(self.back2.image, (self.back2.x, self.back2.y))
+        screen.blit(self.mid.image, (self.mid.x, self.mid.y))
+        screen.blit(self.mid2.image, (self.mid2.x, self.mid2.y))
 
 
 
@@ -192,7 +212,9 @@ while running:
                 player.state("run")
                 player.move(6)
             if event.key == pygame.K_UP:
-                dialogue.say("test")
+                dialogue.say()
+            if event.key == pygame.K_1:
+                moving_speed += 1
 
         if event.type == pygame.KEYUP:
             player.move(0)
@@ -216,4 +238,4 @@ while running:
 
     pygame.display.update()
 
-    clock.tick(72);
+    clock.tick(80);
