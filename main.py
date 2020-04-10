@@ -83,7 +83,6 @@ class Button():
             options.state = RUNNING
 
 
-
 class Dialogue:
     def __init__(self):
         self.message = ""
@@ -236,7 +235,60 @@ class Guaca(pygame.sprite.Sprite):
         self.velocity = speed
 
 
+class Bug:
+    def __init__(self, name, x, y):
+        self.frames = glob.glob("assets/bug/" + name + "/*.png")
+        self.frame_pos = random.randint(0, len(self.frames)-1)
+        self.frame_max = len(self.frames) - 1
+        self.img = pygame.image.load(self.frames[self.frame_pos])
+        self.x = x
+        self.y = y
+
+    def draw(self):
+
+        self.img = pygame.image.load(self.frames[self.frame_pos])
+        if self.frame_pos == self.frame_max:
+            self.frame_pos = 0
+        else:
+            self.frame_pos += 1
+
+        self.x -= options.speed
+
+        screen.blit(self.img, (self.x, self.y))
+
+
+bug_names = ["bee"]
+animal_names = []
+plant_names = []
+
+class Environment:
+    def __init__(self):
+        self.plants = []
+        self.bugs = []
+        self.animals = []
+        self.grass = []
+
+    def create(self, name):
+        return Bug(name, width + random.randint(0, 2000), 380)
+
+    def invisible(self):
+        for bug in self.bugs:
+            if bug.x < 0:
+                self.bugs.remove(bug)
+
+    def loop(self):
+
+        self.invisible()
+
+        if len(self.bugs) < 3:
+            self.bugs.append(self.create(random.choice(bug_names)))
+
+        for bug in self.bugs:
+            bug.draw()
+
+
 player = Guaca()
+environment = Environment()
 background = Background()
 logo = Logo()
 dialogue = Dialogue()
@@ -291,6 +343,8 @@ while True:
             logo.move()
         else:
             logo.draw()
+
+        environment.loop()
 
         player.update()
 
