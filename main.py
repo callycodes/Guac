@@ -50,7 +50,7 @@ class GameOptions:
 
     def draw(self):
         score = menu.render("SCORE: 60", False, (255, 255, 255))
-        screen.blit(score, (player.x, player.y - 5))
+        screen.blit(score, (player.x, player.y - 100))
         # screen.blit(score, ((width // 2 - score.get_width() // 2), 10))
 
 
@@ -183,6 +183,45 @@ class Background(pygame.sprite.Sprite):
         screen.blit(self.mid2.image, (self.mid2.x, self.mid2.y))
 
 
+class SpriteAnimation:
+    def __init__(self, name, w=32, h=32):
+        self.frames = glob.glob("assets/text/" + name + "/*.png")
+        self.frame_pos = random.randint(0, len(self.frames) - 1)
+        self.frame_max = len(self.frames) - 1
+        self.img = pygame.image.load(self.frames[self.frame_pos])
+        self.opacity = 255
+        self.w = w
+        self.h = h
+
+    def is_collided_with(self, sprite_rect):
+        return self.get_rect().colliderect(sprite_rect)
+
+    def out_of_view(self):
+        if self.opacity < 0:
+            return True
+        else:
+            return False
+
+    def blit_alpha(self, source, location, opacity):
+        x = location[0]
+        y = location[1]
+        temp = pygame.Surface((screen.get_width(), screen.get_height())).convert()
+        temp.blit(screen, (-x, -y))
+        temp.blit(source, (0, 0))
+        temp.set_alpha(opacity)
+        screen.blit(temp, location)
+
+    def draw(self, x, y):
+        self.img = pygame.image.load(self.frames[self.frame_pos]).convert_alpha()
+        if self.frame_pos == self.frame_max:
+            self.frame_pos = 0
+        else:
+            self.frame_pos += 1
+
+        self.blit_alpha(self.img, (x, y), self.opacity)
+        self.opacity -= 5
+
+
 class Guaca(pygame.sprite.Sprite):
     def __init__(self):
         self.action = "idle"
@@ -194,6 +233,13 @@ class Guaca(pygame.sprite.Sprite):
         self.x = 0
         self.y = 380
         self.fire_pos = 0;
+        self.sprite_animations = []
+
+    def get_rect(self):
+        return pygame.Rect(self.x, self.y, 32, 32)
+
+    def add_point(self):
+        self.sprite_animations.append(SpriteAnimation("+1"))
 
     def flame(self):
         image = pygame.image.load(fire_frames[self.fire_pos])
@@ -221,6 +267,12 @@ class Guaca(pygame.sprite.Sprite):
         if self.action == "run":
             self.flame()
 
+        for sprite in self.sprite_animations:
+            if sprite.opacity < 0:
+                self.sprite_animations.remove(sprite)
+
+            sprite.draw(self.x, self.y - 10)
+
         screen.blit(self.img, (self.x, self.y))
 
     def state(self, state):
@@ -235,14 +287,23 @@ class Guaca(pygame.sprite.Sprite):
         self.velocity = speed
 
 
-class Bug:
-    def __init__(self, name, x, y):
-        self.frames = glob.glob("assets/bug/" + name + "/*.png")
+class Decoration:
+    def __init__(self, name, obj_type, x, y, speed = 0, w = 32, h = 32):
+        self.frames = glob.glob("assets/environment/" + obj_type + "/" + name + "/*.png")
         self.frame_pos = random.randint(0, len(self.frames)-1)
         self.frame_max = len(self.frames) - 1
         self.img = pygame.image.load(self.frames[self.frame_pos])
         self.x = x
         self.y = y
+        self.speed = speed
+        self.w = w
+        self.h = h
+
+    def get_rect(self):
+        return pygame.Rect(self.x, self.y, self.w, self.h)
+
+    def is_collided_with(self, sprite_rect):
+        return self.get_rect().colliderect(sprite_rect)
 
     def draw(self):
 
@@ -253,13 +314,17 @@ class Bug:
             self.frame_pos += 1
 
         self.x -= options.speed
+        self.x -= self.speed
 
-        screen.blit(self.img, (self.x, self.y))
+        screen.blit(pygame.transform.scale(self.img, (self.w, self.h)), (self.x, self.y))
 
 
 bug_names = ["bee"]
-animal_names = []
+animal_names = ["llama"]
 plant_names = []
+
+object_type = ["bugs", "animals", "consumables"]
+
 
 class Environment:
     def __init__(self):
@@ -267,25 +332,62 @@ class Environment:
         self.bugs = []
         self.animals = []
         self.grass = []
+        self.coins = []
 
-    def create(self, name):
-        return Bug(name, width + random.randint(0, 2000), 380)
+    def create(self, name, obj_type):
+        if obj_type == "bugs":
+            return Decoration(name, obj_type, width + random.randint(0, 2000), 380, 0, 64, 64)
+        elif obj_type == "animals":
+            speed = 0
+            if name == "llama":
+                speed = 4
+            return Decoration(name, obj_type, width + random.randint(0, 2000), 370, speed, 80, 80)
+        elif obj_type == "consumables":
+            return Decoration(name, obj_type, width + random.randint(0, 2000), 400, 0, 64, 64)
 
     def invisible(self):
         for bug in self.bugs:
-            if bug.x < 0:
+            if bug.x < -50:
                 self.bugs.remove(bug)
+
+        for animal in self.animals:
+            if animal.x < -50:
+                self.animals.remove(animal)
+
+        for coin in self.coins:
+            if coin.x < -50:
+                self.coins.remove(coin)
 
     def loop(self):
 
         self.invisible()
 
+        for coin in self.coins:
+            if coin.is_collided_with(player.get_rect()):
+                player.add_point()
+                options.score += 1
+                self.coins.remove(coin)
+
         if len(self.bugs) < 3:
-            self.bugs.append(self.create(random.choice(bug_names)))
+            self.bugs.append(self.create(random.choice(bug_names), "bugs"))
+
+        if len(self.animals) < 1 and random.randint(0, 5) < 2:
+            self.animals.append(self.create(random.choice(animal_names), "animals"))
+
+        if len(self.coins) < 1 and random.randint(0, 5) < 1:
+            self.coins.append(self.create("coin", "consumables"))
 
         for bug in self.bugs:
             bug.draw()
 
+        for animal in self.animals:
+            animal.draw()
+
+        for coin in self.coins:
+            coin.draw()
+
+        # draw coin and time counters
+        Decoration()
 
 player = Guaca()
 environment = Environment()
