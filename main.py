@@ -7,8 +7,6 @@ import random
 
 pygame.init()
 
-moving_speed = 0
-
 height = 480
 width = 1440
 # Set up the drawing window
@@ -20,13 +18,15 @@ fire_frames = glob.glob("assets/guaca/fire/*.png")
 
 text = pygame.font.Font("assets/fonts/pixelated.ttf", 18)
 title = pygame.font.Font("assets/fonts/pixelated.ttf", 24)
+menu = pygame.font.Font("assets/fonts/pixelated.ttf", 12)
+
+play_button = pygame.image.load("assets/buttons/sprite_1.png")
+pause_button = pygame.image.load("assets/buttons/sprite_0.png")
 
 clock = pygame.time.Clock()
 
 dialogue_event = pygame.USEREVENT + 1
 
-# Run until the user asks to quit
-running = True
 
 class Layer:
     def __init__(self, speed, image, x, y):
@@ -37,6 +37,51 @@ class Layer:
 
     def setX(self, x):
         self.x = x
+
+
+RUNNING, PAUSED, QUIT, MAIN_MENU = 0, 1, 2, 3
+
+
+class GameOptions:
+    def __init__(self):
+        self.score = 0
+        self.speed = 3
+        self.state = RUNNING
+
+    def draw(self):
+        score = menu.render("SCORE: 60", False, (255, 255, 255))
+        screen.blit(score, (player.x, player.y - 5))
+        # screen.blit(score, ((width // 2 - score.get_width() // 2), 10))
+
+
+options = GameOptions()
+
+
+class Button():
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.w = 48
+        self.h = 48
+
+    def draw(self):
+        if options.state == RUNNING:
+            screen.blit(pygame.transform.scale(pause_button, (self.w, self.h)), (self.x, self.y))
+        else:
+            screen.blit(pygame.transform.scale(play_button, (self.w, self.h)), (self.x, self.y))
+
+    def collided(self, x, y):
+        if self.x + self.w > x > self.x and self.y + self.h > y > self.y:
+            return True
+        else:
+            return False
+
+    def change(self):
+        if options.state == RUNNING:
+            options.state = PAUSED
+        elif options.state == PAUSED:
+            options.state = RUNNING
+
 
 
 class Dialogue:
@@ -108,8 +153,8 @@ class Background(pygame.sprite.Sprite):
         self.back = Layer(1, "assets/background/l1_sprite_1.png", 0, 0)
         self.back2 = Layer(1, "assets/background/l1_sprite_1.png", width, 0)
 
-        self.mid = Layer(moving_speed, "assets/background/l2_sprite_1.png", 0, 0)
-        self.mid2 = Layer(moving_speed, "assets/background/l2_sprite_1.png", width, 0)
+        self.mid = Layer(options.speed, "assets/background/l2_sprite_1.png", 0, 0)
+        self.mid2 = Layer(options.speed, "assets/background/l2_sprite_1.png", width, 0)
 
         # self.front = Layer(3, "", 0)
         # self.front2 = Layer(3, "", width)
@@ -127,17 +172,16 @@ class Background(pygame.sprite.Sprite):
         if (self.mid2.x + width) <= 0:
             self.mid2.x = width
 
-        self.back.x -= (moving_speed / 10) * 2
-        self.back2.x -= (moving_speed / 10) * 2
+        self.back.x -= options.speed - 1
+        self.back2.x -= options.speed - 1
 
-        self.mid.x -= (moving_speed / 10) * 5
-        self.mid2.x -= (moving_speed / 10) * 5
+        self.mid.x -= options.speed
+        self.mid2.x -= options.speed
 
         screen.blit(self.back.image, (self.back.x, self.back.y))
         screen.blit(self.back2.image, (self.back2.x, self.back2.y))
         screen.blit(self.mid.image, (self.mid.x, self.mid.y))
         screen.blit(self.mid2.image, (self.mid2.x, self.mid2.y))
-
 
 
 class Guaca(pygame.sprite.Sprite):
@@ -169,7 +213,7 @@ class Guaca(pygame.sprite.Sprite):
         else:
             self.frame_pos += 1
 
-        self.x -= moving_speed
+        self.x -= options.speed
         self.x += self.velocity
 
         if self.x <= 0:
@@ -196,13 +240,21 @@ player = Guaca()
 background = Background()
 logo = Logo()
 dialogue = Dialogue()
+state_button = Button(10, 10)
 
-while running:
+while True:
 
-    # Did the user click the window close button?
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
+            options.state = QUIT
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            # 1 is the left mouse button, 2 is middle, 3 is right.
+            if event.button == 1:
+                # `event.pos` is the mouse position.
+                x, y = event.pos
+                if state_button.collided(x, y):
+                    state_button.change()
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
@@ -211,10 +263,17 @@ while running:
             if event.key == pygame.K_RIGHT:
                 player.state("run")
                 player.move(6)
+            if event.key == pygame.K_DOWN:
+                player.state("spin")
+                player.move(10)
             if event.key == pygame.K_UP:
                 dialogue.say()
             if event.key == pygame.K_1:
-                moving_speed += 1
+                options.speed += 1
+            if event.key == pygame.K_2:
+                options.state = PAUSED
+            if event.key == pygame.K_3:
+                options.state = RUNNING
 
         if event.type == pygame.KEYUP:
             player.move(0)
@@ -225,17 +284,22 @@ while running:
 
     # Fill the background with white
     # screen.blit(background, (0, 0))
-    background.update()
+    if options.state == RUNNING:
+        background.update()
 
-    if logo.remove_check(player.x):
-        logo.move()
-    else:
-        logo.draw()
+        if logo.remove_check(player.x):
+            logo.move()
+        else:
+            logo.draw()
 
-    player.update()
+        player.update()
 
-    dialogue.display()
+        dialogue.display()
+
+        options.draw()
+
+    state_button.draw()
 
     pygame.display.update()
 
-    clock.tick(80);
+    clock.tick(80)
