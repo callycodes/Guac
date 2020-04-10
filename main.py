@@ -188,7 +188,7 @@ class SpriteAnimation:
         self.frames = glob.glob("assets/text/" + name + "/*.png")
         self.frame_pos = random.randint(0, len(self.frames) - 1)
         self.frame_max = len(self.frames) - 1
-        self.img = pygame.image.load(self.frames[self.frame_pos])
+        self.img = pygame.image.load(self.frames[self.frame_pos]).convert_alpha()
         self.opacity = 255
         self.w = w
         self.h = h
@@ -212,7 +212,7 @@ class SpriteAnimation:
         screen.blit(temp, location)
 
     def draw(self, x, y):
-        self.img = pygame.image.load(self.frames[self.frame_pos]).convert_alpha()
+        self.img = pygame.image.load(self.frames[self.frame_pos]).convert_alpha().convert_alpha()
         if self.frame_pos == self.frame_max:
             self.frame_pos = 0
         else:
@@ -229,7 +229,7 @@ class Guaca(pygame.sprite.Sprite):
         self.frames = glob.glob("assets/guaca/idle/*.png")
         self.frame_pos = 0
         self.frame_max = len(self.frames) - 1
-        self.img = pygame.image.load(self.frames[self.frame_pos])
+        self.img = pygame.image.load(self.frames[self.frame_pos]).convert_alpha()
         self.x = 0
         self.y = 380
         self.fire_pos = 0;
@@ -252,7 +252,7 @@ class Guaca(pygame.sprite.Sprite):
 
     def update(self):
 
-        self.img = pygame.image.load(self.frames[self.frame_pos])
+        self.img = pygame.image.load(self.frames[self.frame_pos]).convert_alpha()
         if self.frame_pos == self.frame_max:
             self.frame_pos = 0
         else:
@@ -280,11 +280,38 @@ class Guaca(pygame.sprite.Sprite):
             self.frames = glob.glob("assets/guaca/" + state + "/*.png")
             self.frame_pos = 0
             self.frame_max = len(self.frames) - 1
-            self.img = pygame.image.load(self.frames[self.frame_pos])
+            self.img = pygame.image.load(self.frames[self.frame_pos]).convert_alpha()
             self.action = state
 
     def move(self, speed):
         self.velocity = speed
+
+
+class Components:
+    def __init__(self, name, x, y, w = 64, h = 64):
+        self.frames = glob.glob("assets/components/" + name + "/*.png")
+        self.frame_pos = random.randint(0, len(self.frames)-1)
+        self.frame_max = len(self.frames) - 1
+        self.images = []
+
+        for frame in self.frames:
+            self.images.append(pygame.image.load(frame).convert_alpha())
+
+        self.img = self.images[0]
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+
+    def draw(self):
+
+        self.img = self.images[self.frame_pos]
+        if self.frame_pos == self.frame_max:
+            self.frame_pos = 0
+        else:
+            self.frame_pos += 1
+
+        screen.blit(pygame.transform.scale(self.img, (self.w, self.h)), (self.x, self.y))
 
 
 class Decoration:
@@ -292,7 +319,7 @@ class Decoration:
         self.frames = glob.glob("assets/environment/" + obj_type + "/" + name + "/*.png")
         self.frame_pos = random.randint(0, len(self.frames)-1)
         self.frame_max = len(self.frames) - 1
-        self.img = pygame.image.load(self.frames[self.frame_pos])
+        self.img = pygame.image.load(self.frames[self.frame_pos]).convert_alpha()
         self.x = x
         self.y = y
         self.speed = speed
@@ -307,7 +334,7 @@ class Decoration:
 
     def draw(self):
 
-        self.img = pygame.image.load(self.frames[self.frame_pos])
+        self.img = pygame.image.load(self.frames[self.frame_pos]).convert_alpha()
         if self.frame_pos == self.frame_max:
             self.frame_pos = 0
         else:
@@ -386,8 +413,7 @@ class Environment:
         for coin in self.coins:
             coin.draw()
 
-        # draw coin and time counters
-        Decoration()
+
 
 player = Guaca()
 environment = Environment()
@@ -395,6 +421,7 @@ background = Background()
 logo = Logo()
 dialogue = Dialogue()
 state_button = Button(10, 10)
+timer = Components("timer", width - 200, 20, 40, 45)
 
 while True:
 
@@ -455,7 +482,8 @@ while True:
         options.draw()
 
     state_button.draw()
+    timer.draw()
 
     pygame.display.update()
 
-    clock.tick(80)
+    clock.tick(60)

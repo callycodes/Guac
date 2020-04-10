@@ -31,11 +31,11 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\londo\PycharmProjects\Guac\assets\components\timer" />
       <recent name="C:\Users\londo\PycharmProjects\Guac\assets\text\+1" />
       <recent name="C:\Users\londo\PycharmProjects\Guac\assets\environment\object" />
       <recent name="C:\Users\londo\PycharmProjects\Guac\assets\environment\coin" />
       <recent name="C:\Users\londo\PycharmProjects\Guac\assets\environment\animals\llama" />
-      <recent name="C:\Users\londo\PycharmProjects\Guac\assets\environment" />
     </key>
   </component>
   <component name="RunManager">
@@ -82,6 +82,7 @@
       <workItem from="1586121246146" duration="13703000" />
       <workItem from="1586300255176" duration="1343000" />
       <workItem from="1586431917739" duration="23115000" />
+      <workItem from="1586525248611" duration="2939000" />
     </task>
     <servers />
   </component>
@@ -89,26 +90,26 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
-    <state width="746" height="227" key="GridCell.Tab.0.bottom" timestamp="1586519387894">
+    <state width="746" height="227" key="GridCell.Tab.0.bottom" timestamp="1586527564741">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="746" height="227" key="GridCell.Tab.0.bottom/0.0.1536.824/0.2160.2194.629@0.0.1536.824" timestamp="1586519387894" />
-    <state width="746" height="227" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1586300784217" />
-    <state width="746" height="227" key="GridCell.Tab.0.center" timestamp="1586519387894">
+    <state width="746" height="227" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1586527564741" />
+    <state width="746" height="227" key="GridCell.Tab.0.center" timestamp="1586527564741">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="746" height="227" key="GridCell.Tab.0.center/0.0.1536.824/0.2160.2194.629@0.0.1536.824" timestamp="1586519387894" />
-    <state width="746" height="227" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1586300784217" />
-    <state width="746" height="227" key="GridCell.Tab.0.left" timestamp="1586519387894">
+    <state width="746" height="227" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1586527564741" />
+    <state width="746" height="227" key="GridCell.Tab.0.left" timestamp="1586527564741">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="746" height="227" key="GridCell.Tab.0.left/0.0.1536.824/0.2160.2194.629@0.0.1536.824" timestamp="1586519387894" />
-    <state width="746" height="227" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1586300784217" />
-    <state width="746" height="227" key="GridCell.Tab.0.right" timestamp="1586519387894">
+    <state width="746" height="227" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1586527564741" />
+    <state width="746" height="227" key="GridCell.Tab.0.right" timestamp="1586527564741">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="746" height="227" key="GridCell.Tab.0.right/0.0.1536.824/0.2160.2194.629@0.0.1536.824" timestamp="1586519387894" />
-    <state width="746" height="227" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1586300784217" />
+    <state width="746" height="227" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1586527564741" />
     <state width="672" height="243" key="GridCell.Tab.1.bottom" timestamp="1585942310190">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -129,10 +130,10 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="278" y="77" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1585922641709" />
-    <state x="185" y="47" key="com.intellij.ide.util.TipDialog" timestamp="1586432013048">
+    <state x="185" y="47" key="com.intellij.ide.util.TipDialog" timestamp="1586525385205">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="185" y="47" key="com.intellij.ide.util.TipDialog/0.0.1536.824/0.2160.2194.629@0.0.1536.824" timestamp="1586432013048" />
+    <state x="185" y="47" key="com.intellij.ide.util.TipDialog/0.0.1536.824/0.2160.2194.629@0.0.1536.824" timestamp="1586525385205" />
     <state x="185" y="47" key="com.intellij.ide.util.TipDialog/0.0.1536.824@0.0.1536.824" timestamp="1586300268460" />
     <state x="411" y="28" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1586191936420">
       <screen x="0" y="0" width="1536" height="824" />
@@ -144,6 +145,6 @@
     <state x="431" y="145" width="672" height="678" key="search.everywhere.popup/0.0.1536.824/0.2160.2194.629@0.0.1536.824" timestamp="1586189389543" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Guac$main.coverage" NAME="main Coverage Results" MODIFIED="1586519387879" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Guac$main.coverage" NAME="main Coverage Results" MODIFIED="1586527564735" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
