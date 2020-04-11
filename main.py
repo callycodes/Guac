@@ -152,11 +152,11 @@ class Background(pygame.sprite.Sprite):
         self.back = Layer(1, "assets/background/l1_sprite_1.png", 0, 0)
         self.back2 = Layer(1, "assets/background/l1_sprite_1.png", width, 0)
 
-        self.mid = Layer(options.speed, "assets/background/l2_sprite_1.png", 0, 0)
-        self.mid2 = Layer(options.speed, "assets/background/l2_sprite_1.png", width, 0)
+        self.mid = Layer(options.speed, "assets/background/l2_sprite_1.png", 0, 26)
+        self.mid2 = Layer(options.speed, "assets/background/l2_sprite_1.png", width, 26)
 
-        # self.front = Layer(3, "", 0)
-        # self.front2 = Layer(3, "", width)
+        self.front = Layer(options.speed, "assets/background/l3_sprite_2.png", 0, 0)
+        self.front2 = Layer(options.speed, "assets/background/l3_sprite_2.png", width, 0)
 
     def update(self):
         if (self.back.x + width) <= 0:
@@ -171,16 +171,27 @@ class Background(pygame.sprite.Sprite):
         if (self.mid2.x + width) <= 0:
             self.mid2.x = width
 
-        self.back.x -= options.speed - 1
-        self.back2.x -= options.speed - 1
+        if (self.front.x + width) <= 0:
+            self.front.x = width
 
-        self.mid.x -= options.speed
-        self.mid2.x -= options.speed
+        if (self.front2.x + width) <= 0:
+            self.front2.x = width
+
+        self.back.x -= options.speed - 2
+        self.back2.x -= options.speed - 2
+
+        self.mid.x -= options.speed - 1
+        self.mid2.x -= options.speed - 1
+
+        self.front.x -= options.speed
+        self.front2.x -= options.speed
 
         screen.blit(self.back.image, (self.back.x, self.back.y))
         screen.blit(self.back2.image, (self.back2.x, self.back2.y))
         screen.blit(self.mid.image, (self.mid.x, self.mid.y))
         screen.blit(self.mid2.image, (self.mid2.x, self.mid2.y))
+        screen.blit(self.front.image, (self.front.x, self.front.y))
+        screen.blit(self.front2.image, (self.front2.x, self.front2.y))
 
 
 class SpriteAnimation:
@@ -231,7 +242,7 @@ class Guaca(pygame.sprite.Sprite):
         self.frame_max = len(self.frames) - 1
         self.img = pygame.image.load(self.frames[self.frame_pos]).convert_alpha()
         self.x = 0
-        self.y = 380
+        self.y = 385
         self.fire_pos = 0;
         self.sprite_animations = []
 
@@ -347,7 +358,7 @@ class Decoration:
 
 
 bug_names = ["bee"]
-animal_names = ["llama"]
+animal_names = ["llama", "bunny", "meerkat"]
 plant_names = []
 
 object_type = ["bugs", "animals", "consumables"]
@@ -365,10 +376,18 @@ class Environment:
         if obj_type == "bugs":
             return Decoration(name, obj_type, width + random.randint(0, 2000), 380, 0, 64, 64)
         elif obj_type == "animals":
+            w, h = 80, 80
+            y = 370
             speed = 0
             if name == "llama":
                 speed = 4
-            return Decoration(name, obj_type, width + random.randint(0, 2000), 370, speed, 80, 80)
+            if name == "bunny":
+                speed = 8
+            if name == "meerkat":
+                speed = 0
+                w = 60
+                h = 60
+            return Decoration(name, obj_type, width + random.randint(0, 2000), y, speed, w, h)
         elif obj_type == "consumables":
             return Decoration(name, obj_type, width + random.randint(0, 2000), 400, 0, 64, 64)
 
@@ -398,7 +417,7 @@ class Environment:
         if len(self.bugs) < 3:
             self.bugs.append(self.create(random.choice(bug_names), "bugs"))
 
-        if len(self.animals) < 1 and random.randint(0, 5) < 2:
+        if len(self.animals) < 3 and random.randint(0, 5) < 2:
             self.animals.append(self.create(random.choice(animal_names), "animals"))
 
         if len(self.coins) < 1 and random.randint(0, 5) < 1:
