@@ -13,19 +13,22 @@ width = 1440
 screen = pygame.display.set_mode([width, height])
 
 # background = pygame.image.load("assets/background/background.png")
-logo = pygame.image.load("assets/logo.png")
+logo = pygame.image.load("assets/logo.png").convert_alpha()
 fire_frames = glob.glob("assets/guaca/fire/*.png")
 
 text = pygame.font.Font("assets/fonts/pixelated.ttf", 18)
 title = pygame.font.Font("assets/fonts/pixelated.ttf", 24)
 menu = pygame.font.Font("assets/fonts/pixelated.ttf", 12)
 
-play_button = pygame.image.load("assets/buttons/sprite_1.png")
-pause_button = pygame.image.load("assets/buttons/sprite_0.png")
+play_button = pygame.transform.scale(pygame.image.load("assets/buttons/sprite_1.png").convert_alpha(), (48, 48))
+pause_button = pygame.transform.scale(pygame.image.load("assets/buttons/sprite_0.png").convert_alpha(), (48, 48))
 
 clock = pygame.time.Clock()
 
 dialogue_event = pygame.USEREVENT + 1
+speedup_event = pygame.USEREVENT + 2
+
+pygame.time.set_timer(speedup_event, 5000)
 
 
 class Layer:
@@ -33,10 +36,14 @@ class Layer:
         self.x = x
         self.y = y
         self.speed = speed
-        self.image = pygame.image.load(image)
+        self.image = pygame.image.load(image).convert_alpha()
 
     def setX(self, x):
         self.x = x
+
+    def set_speed(self):
+        self.speed = options.speed
+
 
 
 RUNNING, PAUSED, QUIT, MAIN_MENU = 0, 1, 2, 3
@@ -49,7 +56,7 @@ class GameOptions:
         self.state = RUNNING
 
     def draw(self):
-        score = menu.render("SCORE: 60", False, (255, 255, 255))
+        score = menu.render("SCORE: " + str(self.score), False, (255, 255, 255))
         screen.blit(score, (player.x, player.y - 100))
         # screen.blit(score, ((width // 2 - score.get_width() // 2), 10))
 
@@ -66,9 +73,9 @@ class Button():
 
     def draw(self):
         if options.state == RUNNING:
-            screen.blit(pygame.transform.scale(pause_button, (self.w, self.h)), (self.x, self.y))
+            screen.blit(pause_button, (self.x, self.y))
         else:
-            screen.blit(pygame.transform.scale(play_button, (self.w, self.h)), (self.x, self.y))
+            screen.blit(play_button, (self.x, self.y))
 
     def collided(self, x, y):
         if self.x + self.w > x > self.x and self.y + self.h > y > self.y:
@@ -149,42 +156,42 @@ class Logo:
 
 class Background(pygame.sprite.Sprite):
     def __init__(self):
+
         self.back = Layer(1, "assets/background/l1_sprite_1.png", 0, 0)
         self.back2 = Layer(1, "assets/background/l1_sprite_1.png", width, 0)
 
-        self.mid = Layer(options.speed, "assets/background/l2_sprite_1.png", 0, 26)
-        self.mid2 = Layer(options.speed, "assets/background/l2_sprite_1.png", width, 26)
+        self.mid = Layer(2, "assets/background/l2_sprite_1.png", 0, 26)
+        self.mid2 = Layer(2, "assets/background/l2_sprite_1.png", width, 26)
 
         self.front = Layer(options.speed, "assets/background/l3_sprite_2.png", 0, 0)
         self.front2 = Layer(options.speed, "assets/background/l3_sprite_2.png", width, 0)
 
     def update(self):
-        if (self.back.x + width) <= 0:
-            self.back.x = width
+        self.front.set_speed()
 
-        if (self.back2.x + width) <= 0:
-            self.back2.x = width
+        self.back.x -= self.back.speed
+        self.back2.x -= self.back.speed
 
-        if (self.mid.x + width) <= 0:
-            self.mid.x = width
+        self.mid.x -= self.mid.speed
+        self.mid2.x -= self.mid.speed
 
-        if (self.mid2.x + width) <= 0:
-            self.mid2.x = width
+        self.front.x -= self.front.speed
+        self.front2.x -= self.front.speed
 
-        if (self.front.x + width) <= 0:
-            self.front.x = width
+        if self.back.x < width * -1:
+            self.back.x = width - 2
+        if self.back2.x < width * -1:
+            self.back2.x = width - 2
 
-        if (self.front2.x + width) <= 0:
-            self.front2.x = width
+        if self.mid.x < width * -1:
+            self.mid.x = width - 2
+        if self.mid2.x < width * -1:
+            self.mid2.x = width - 2
 
-        self.back.x -= options.speed - 2
-        self.back2.x -= options.speed - 2
-
-        self.mid.x -= options.speed - 1
-        self.mid2.x -= options.speed - 1
-
-        self.front.x -= options.speed
-        self.front2.x -= options.speed
+        if self.front.x < width * -1:
+            self.front.x = width - 2
+        if self.front2.x < width * -1:
+            self.front2.x = width - 2
 
         screen.blit(self.back.image, (self.back.x, self.back.y))
         screen.blit(self.back2.image, (self.back2.x, self.back2.y))
@@ -194,12 +201,18 @@ class Background(pygame.sprite.Sprite):
         screen.blit(self.front2.image, (self.front2.x, self.front2.y))
 
 
+
 class SpriteAnimation:
     def __init__(self, name, w=32, h=32):
         self.frames = glob.glob("assets/text/" + name + "/*.png")
         self.frame_pos = random.randint(0, len(self.frames) - 1)
         self.frame_max = len(self.frames) - 1
-        self.img = pygame.image.load(self.frames[self.frame_pos]).convert_alpha()
+        self.images = []
+
+        for frame in self.frames:
+            self.images.append(pygame.image.load(frame).convert_alpha())
+
+        self.img = self.images[0]
         self.opacity = 255
         self.w = w
         self.h = h
@@ -223,7 +236,7 @@ class SpriteAnimation:
         screen.blit(temp, location)
 
     def draw(self, x, y):
-        self.img = pygame.image.load(self.frames[self.frame_pos]).convert_alpha().convert_alpha()
+        self.img = self.images[self.frame_pos]
         if self.frame_pos == self.frame_max:
             self.frame_pos = 0
         else:
@@ -240,7 +253,19 @@ class Guaca(pygame.sprite.Sprite):
         self.frames = glob.glob("assets/guaca/idle/*.png")
         self.frame_pos = 0
         self.frame_max = len(self.frames) - 1
-        self.img = pygame.image.load(self.frames[self.frame_pos]).convert_alpha()
+        self.images = []
+
+        for frame in self.frames:
+            self.images.append(pygame.image.load(frame).convert_alpha())
+
+        self.img = self.images[0]
+
+        self.fire_frames = glob.glob("assets/guaca/fire/*.png")
+        self.fire_images = []
+        for frame in self.fire_frames:
+            self.fire_images.append(pygame.image.load(frame).convert_alpha())
+
+
         self.x = 0
         self.y = 385
         self.fire_pos = 0;
@@ -253,7 +278,7 @@ class Guaca(pygame.sprite.Sprite):
         self.sprite_animations.append(SpriteAnimation("+1"))
 
     def flame(self):
-        image = pygame.image.load(fire_frames[self.fire_pos])
+        image = self.fire_images[self.fire_pos]
         if self.fire_pos == len(fire_frames) - 1:
             self.fire_pos = 0
         else:
@@ -263,7 +288,7 @@ class Guaca(pygame.sprite.Sprite):
 
     def update(self):
 
-        self.img = pygame.image.load(self.frames[self.frame_pos]).convert_alpha()
+        self.img = self.images[self.frame_pos]
         if self.frame_pos == self.frame_max:
             self.frame_pos = 0
         else:
@@ -291,7 +316,13 @@ class Guaca(pygame.sprite.Sprite):
             self.frames = glob.glob("assets/guaca/" + state + "/*.png")
             self.frame_pos = 0
             self.frame_max = len(self.frames) - 1
-            self.img = pygame.image.load(self.frames[self.frame_pos]).convert_alpha()
+            self.images = []
+
+            for frame in self.frames:
+                self.images.append(pygame.image.load(frame).convert_alpha())
+
+            self.img = self.images[0]
+
             self.action = state
 
     def move(self, speed):
@@ -303,16 +334,19 @@ class Components:
         self.frames = glob.glob("assets/components/" + name + "/*.png")
         self.frame_pos = random.randint(0, len(self.frames)-1)
         self.frame_max = len(self.frames) - 1
+
+        self.w = w
+        self.h = h
+
         self.images = []
 
         for frame in self.frames:
-            self.images.append(pygame.image.load(frame).convert_alpha())
+            self.images.append(pygame.transform.scale(pygame.image.load(frame).convert_alpha(), (self.w, self.h)))
 
         self.img = self.images[0]
         self.x = x
         self.y = y
-        self.w = w
-        self.h = h
+
 
     def draw(self):
 
@@ -322,7 +356,7 @@ class Components:
         else:
             self.frame_pos += 1
 
-        screen.blit(pygame.transform.scale(self.img, (self.w, self.h)), (self.x, self.y))
+        screen.blit(self.img, (self.x, self.y))
 
 
 class Decoration:
@@ -330,12 +364,20 @@ class Decoration:
         self.frames = glob.glob("assets/environment/" + obj_type + "/" + name + "/*.png")
         self.frame_pos = random.randint(0, len(self.frames)-1)
         self.frame_max = len(self.frames) - 1
-        self.img = pygame.image.load(self.frames[self.frame_pos]).convert_alpha()
+
+        self.w = w
+        self.h = h
+
+        self.images = []
+
+        for frame in self.frames:
+            self.images.append(pygame.transform.scale(pygame.image.load(frame).convert_alpha(), (self.w, self.h)))
+
+        self.img = self.images[0]
         self.x = x
         self.y = y
         self.speed = speed
-        self.w = w
-        self.h = h
+
 
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.w, self.h)
@@ -345,7 +387,7 @@ class Decoration:
 
     def draw(self):
 
-        self.img = pygame.image.load(self.frames[self.frame_pos]).convert_alpha()
+        self.img = self.images[self.frame_pos]
         if self.frame_pos == self.frame_max:
             self.frame_pos = 0
         else:
@@ -354,7 +396,7 @@ class Decoration:
         self.x -= options.speed
         self.x -= self.speed
 
-        screen.blit(pygame.transform.scale(self.img, (self.w, self.h)), (self.x, self.y))
+        screen.blit(self.img, (self.x, self.y))
 
 
 bug_names = ["bee"]
@@ -417,7 +459,7 @@ class Environment:
         if len(self.bugs) < 3:
             self.bugs.append(self.create(random.choice(bug_names), "bugs"))
 
-        if len(self.animals) < 3 and random.randint(0, 5) < 2:
+        if len(self.animals) < 1 and random.randint(0, 5) < 2:
             self.animals.append(self.create(random.choice(animal_names), "animals"))
 
         if len(self.coins) < 1 and random.randint(0, 5) < 1:
@@ -482,6 +524,9 @@ while True:
         if event.type == dialogue_event:
             dialogue.destroy()
 
+        if event.type == speedup_event:
+            options.speed += 1
+
     # Fill the background with white
     # screen.blit(background, (0, 0))
     if options.state == RUNNING:
@@ -505,4 +550,4 @@ while True:
 
     pygame.display.update()
 
-    clock.tick(60)
+    clock.tick(30)
