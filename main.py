@@ -168,8 +168,8 @@ class Logo:
 class Background(pygame.sprite.Sprite):
     def __init__(self):
 
-        self.back = Layer(0, "assets/background/l1_sprite_1.png", 0, 0)
-        self.back2 = Layer(0, "assets/background/l1_sprite_1.png", width, 0)
+        self.back = Layer(0, "assets/background/l0_sprite_1.png", 0, 0)
+        self.back2 = Layer(0, "assets/background/l0_sprite_1.png", width, 0)
 
         self.mid = Layer(0, "assets/background/l1_sprite_1.png", 0, 0)
         self.mid2 = Layer(0, "assets/background/l1_sprite_1.png", width, 0)
@@ -443,7 +443,7 @@ class Decoration:
         self.frames = glob.glob("assets/environment/" + obj_type + "/" + name + "/*.png")
         self.frame_pos = random.randint(0, len(self.frames) - 1)
         self.frame_max = len(self.frames) - 1
-
+        self.name = name
         self.w = w
         self.h = h
 
@@ -456,6 +456,7 @@ class Decoration:
         self.x = x
         self.y = y
         self.speed = speed
+        self.eagle_up = False
 
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.w, self.h)
@@ -471,14 +472,24 @@ class Decoration:
         else:
             self.frame_pos += 1
 
-        self.x -= options.speed
-        self.x -= self.speed
+        if self.name == "eagle":
+            if self.eagle_up or self.y >= 350:
+                self.x -= self.speed
+                self.y -= self.speed // 2
+                self.eagle_up = True
+            else:
+                self.x -= self.speed
+                self.y += self.speed // 2
+
+        else:
+            self.x -= options.speed
+            self.x -= self.speed
 
         screen.blit(self.img, (self.x, self.y))
 
 
 bug_names = ["bee"]
-animal_names = ["llama", "bunny", "meerkat"]
+animal_names = ["llama", "bunny", "meerkat", "eagle"]
 plant_names = []
 
 object_type = ["bugs", "animals", "consumables"]
@@ -507,9 +518,16 @@ class Environment:
                 speed = 0
                 w = 60
                 h = 60
+            if name == "eagle":
+                print("eagled spawned")
+                speed = 8
+                w = 120
+                h = 120
+                return Decoration(name, obj_type, (width-500) + random.randint(0, 1000), -120, speed, w, h)
             return Decoration(name, obj_type, width + random.randint(0, 100), y, speed, w, h)
         elif obj_type == "consumables":
             return Decoration(name, obj_type, width + random.randint(0, 2000), 400, 0, 64, 64)
+
 
     def invisible(self):
         for bug in self.bugs:
@@ -517,7 +535,7 @@ class Environment:
                 self.bugs.remove(bug)
 
         for animal in self.animals:
-            if animal.x < -50:
+            if animal.x < -120:
                 self.animals.remove(animal)
 
         for coin in self.coins:
@@ -537,7 +555,7 @@ class Environment:
         if len(self.bugs) < 3:
             self.bugs.append(self.create(random.choice(bug_names), "bugs"))
 
-        if len(self.animals) < 1 and random.randint(0, 5) < 2:
+        if len(self.animals) < 3 and random.randint(0, 5) < 2:
             self.animals.append(self.create(random.choice(animal_names), "animals"))
 
         if len(self.coins) < 1 and random.randint(0, 5) < 1:
@@ -565,7 +583,6 @@ timer = Components("timer", width - 200, 20, 40, 45)
 
 while True:
 
-    screen.fill((70, 140, 170))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             options.state = QUIT
